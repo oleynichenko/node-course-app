@@ -1,0 +1,25 @@
+{
+  "name": "app",
+  "version": "1.0.0",
+  "description": "Project from Node Course",
+  "main": "index.js",
+  "directories": {
+    "doc": "docs"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/oleynichenko/node-course-app.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/oleynichenko/node-course-app/issues"
+  },
+  "homepage": "https://github.com/oleynichenko/node-course-app#readme",
+  "dependencies": {
+    "express": "4.16.4"
+  }
+}
