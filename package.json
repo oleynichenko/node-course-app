@@ -2,12 +2,14 @@
   "name": "app",
   "version": "1.0.0",
   "description": "Project from Node Course",
-  "main": "index.js",
+  "main": "app.js",
   "directories": {
-    "doc": "docs"
+    "doc": "old/docs"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "nodemon app.js",
+    "test": "npm run test:lint",
+    "test:lint": "eslint ."
   },
   "repository": {
     "type": "git",
@@ -20,6 +22,12 @@
   },
   "homepage": "https://github.com/oleynichenko/node-course-app#readme",
   "dependencies": {
-    "express": "4.16.4"
+    "express": "4.16.4",
+    "pug": "2.0.3"
+  },
+  "devDependencies": {
+    "typescript": "3.1.6",
+    "eslint": "5.8.0",
+    "eslint-config-htmlacademy": "0.5.2"
   }
 }
