@@ -1,8 +1,8 @@
 {
-  "name": "app",
+  "name": "node-course-app",
   "version": "1.0.0",
   "description": "Project from Node Course",
-  "main": "app.js",
+  "main": "index.js",
   "directories": {
     "doc": "old/docs"
   },
@@ -22,6 +22,7 @@
   },
   "homepage": "https://github.com/oleynichenko/node-course-app#readme",
   "dependencies": {
+    "colors": "1.3.2",
     "express": "4.16.4",
     "pug": "2.0.3"
   },
