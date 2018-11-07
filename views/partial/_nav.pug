@@ -1,26 +1,21 @@
+
 <nav class="ck pt adq py tk app-navbar">
     <a class="e" href="index.html">
     <img src="img/brand-white.png" alt="brand">
     </a>
-
     <button class="pp bpn vm" type="button" data-toggle="collapse" data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
         <span class="pq"></span>
     </button>
-
     <div class="collapse f" id="navbarResponsive">
     <ul class="navbar-nav ahq">
-        <li class="pi active">
-            <a class="pg" href="/">Home <span class="adt">(current)</span></a>
-        </li>
-        <li class="pi">
-            <a class="pg" href="profile">Profile</a>
-        </li>
-        <li class="pi">
-            <a class="pg" data-toggle="modal" href="#msgModal">Messages</a>
-        </li>
-        <li class="pi">
+        li(class={pi: true, active: `index` === pageName})
+          <a class="pg" href="/">Home <span class="adt">(current)</span></a>
+        li(class={pi: true, active: `profile` === pageName})
+          <a class="pg" href="profile">Profile</a>
+        li(class={pi: true})
+          <a class="pg" data-toggle="modal" href="#msgModal">Messages</a>
+        li(class={pi: true, active: `docs` === pageName})
             <a class="pg" href="docs">Docs</a>
-        </li>
         <li class="pi vm">
             <a class="pg" href="notifications">Notifications</a>
         </li>

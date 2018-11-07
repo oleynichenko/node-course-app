@@ -1,9 +1,9 @@
 const getIndex = (req, res) => {
-  res.render(`index`);
+  res.render(`index`, {pageName: `index`});
 };
 
 const getProfile = (req, res) => {
-  res.render(`profile`);
+  res.render(`profile`, {pageName: `profile`});
 };
 
 const getNotifications = (req, res) => {
@@ -11,7 +11,7 @@ const getNotifications = (req, res) => {
 };
 
 const getDocs = (req, res) => {
-  res.render(`docs`);
+  res.render(`docs`, {pageName: `docs`});
 };
 
 module.exports = {
