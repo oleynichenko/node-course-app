@@ -28,12 +28,21 @@
             .catch(e => console.log(e));
     }
 
+    function getPostTemplate(post) {
+      const imgTemplate = `<div class="boy" data-grid="images">
+        <img class="js-post__img" 
+          style="display: inline-block; 
+            width: 346px; 
+            height: 335px; 
+            margin-bottom: 10px; 
+            margin-right: 0px; 
+            vertical-align: bottom;" 
+          data-width="640" data-height="640" data-action="zoom" src="${post.picture}">
+      </div>`;
 
-    function renderPosts(posts) {
-        feed.innerHTML = '';
-        console.table(posts);
-        posts.forEach(post => {
-            feed.innerHTML += `<li class="rv b agz">
+      const imgBlock = (post.picture) ? imgTemplate : ``;
+
+      return `<li class="rv b agz">
           <img class="bos vb yb aff" src="${post.author.avatar}">
           <div class="rw">
           
@@ -42,37 +51,50 @@
               <h6>${post.author.name}</h6>
             </div>
 
-            <p>${post.text}
+            <p class="js-post__text">${post.text}
             </p>
-
-            <div class="boy" data-grid="images"><img style="display: inline-block; width: 346px; height: 335px; margin-bottom: 10px; margin-right: 0px; vertical-align: bottom;" data-width="640" data-height="640" data-action="zoom" src="${post.picture}"></div>
+            ${imgBlock}
             <a href="#postModalEdit" class="boa" data-toggle="modal" data-id="${post.id}">
                 <button class="cg nz ok" data-id="${post.id}">Редактировать пост</button>
             </a>
-                <button type="button" class="close" aria-hidden="true" title="Удалить">×</button>
+                <button type="button" class="close js-close" aria-hidden="true" title="Удалить">×</button>
           </div>
         </li>`
+    }
+
+    function renderPosts(posts) {
+        feed.innerHTML = '';
+        posts.forEach(post => {
+            feed.innerHTML += getPostTemplate(post);
         })
+    }
+
+    function addPost(post) {
+      feed.insertAdjacentHTML(`afterBegin`, getPostTemplate(post));
     }
 
     function initListeners() {
         createPost.addEventListener('click', createPostListener);
         feed.addEventListener('click', editPostListener);
-
+        feed.addEventListener('click', deletePostListener);
     }
-
 
     function editPostListener(event) {
         if (!event.target.getAttribute("data-id")) {
             return;
         }
-        const id = event.target.getAttribute("data-id");
+        postAttachEdit.value = '';
 
-        fetch(`${apiUrl}/${id}`)
+        const id = event.target.getAttribute("data-id");
+        const api = `${apiUrl}/${id}`;
+
+        fetch(api)
             .then(res => res.json())
             .then(post => {
                 postTextEdit.value = post.text;
-                postImageEdit.setAttribute('src', `${post.picture}`);
+                const picture = post.picture || `https://via.placeholder.com/346x335.png`;
+
+                postImageEdit.setAttribute('src', picture);
 
                 postAttachEdit.addEventListener('change', (event) => {
                     if (event.target.files && event.target.files[0]) {
@@ -91,17 +113,20 @@
 
                     if (postAttachEdit.files[0]) {
                         formData.append('picture', postAttachEdit.files[0], 'postPicture');
-                    } else {
-                        formData.append('picture', postImageEdit.getAttribute('src'));
                     }
 
-                    fetch(apiUrl, {
+                    fetch(api, {
                         method: 'PATCH',
                         body: formData
-                    }).then(response => {
-                        console.log(response);
+                    })
+                    .then(response => response.json())
+                    .then(response => {
                         postPublishEdit.removeEventListener('click', publishHandler);
-                        init();
+                        const textBlock = event.target.parentElement.parentElement.querySelector(`.js-post__text`);
+                        const img = event.target.parentElement.parentElement.querySelector(`.js-post__img`);
+
+                        textBlock.innerHTML = response.text;
+                        img.setAttribute('src', response.picture);
                     });
 
 
@@ -118,7 +143,6 @@
             let formData = new FormData();
             formData.append('text', postTextCreate.value);
 
-
             if (postAttachCreate.files[0]) {
                 formData.append('picture', postAttachCreate.files[0], 'postPicture');
             } else {
@@ -128,10 +152,13 @@
             fetch(apiUrl, {
                 method: 'POST',
                 body: formData
-            }).then(() => {
+            })
+              .then(response => response.json())
+              .then((response) => {
                 postPublishCreate.removeEventListener('click', createHandler);
                 postTextCreate.value = '';
                 postAttachCreate.value = '';
+                addPost(response);
             });
         };
         postPublishCreate.addEventListener('click', createHandler);
@@ -147,5 +174,22 @@
             }
         });
     };
+
+    function deletePostListener(event) {
+      if (!event.target.classList.contains("js-close")) {
+        return;
+      }
+
+      const id = event.target.previousElementSibling.getAttribute("data-id");
+
+      const api = `${apiUrl}/${id}`;
+      fetch(api, {
+        method: `DELETE`
+      })
+        .then((response) => response.json())
+        .then(() => {
+          event.target.parentElement.parentElement.remove();
+        })
+    }
 
 })();

@@ -1,5 +1,6 @@
 const express = require(`express`);
-const indexRouter = require(`./routes/index`);
+const initRouters = require(`./routes/index`);
+const mongoose = require(`./db/mongoose`);
 
 const app = express();
 
@@ -7,6 +8,6 @@ app.set(`views`, `${__dirname}/views`);
 app.set(`view engine`, `pug`);
 
 app.use(express.static(`${__dirname}/assets`));
-app.use(`/`, indexRouter);
+initRouters(app);
 
 module.exports = app;

@@ -1,10 +1,9 @@
-const express = require(`express`);
-const router = new express.Router();
-const controller = require(`../controllers/index`);
+const othersRouters = require(`./others`);
+const postRouter = require(`./post`);
 
-router.get(`/`, controller.getIndex);
-router.get(`/profile`, controller.getProfile);
-router.get(`/notifications`, controller.getNotifications);
-router.get(`/docs`, controller.getDocs);
+const init = (app) => {
+  app.use(`/`, othersRouters);
+  app.use(`/api/posts`, postRouter);
+}
 
-module.exports = router;
+module.exports = init;
