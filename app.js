@@ -1,6 +1,6 @@
 const express = require(`express`);
 const initRouters = require(`./routes/index`);
-const mongoose = require(`./db/mongoose`);
+const config = require(`./config`);
 
 const app = express();
 
@@ -10,4 +10,12 @@ app.set(`view engine`, `pug`);
 app.use(express.static(`${__dirname}/assets`));
 initRouters(app);
 
-module.exports = app;
+const runServer = () => {
+  app.listen(config.PORT, () => {
+    console.log(`Server is listening`);
+  });
+};
+
+module.exports = {
+  runServer
+};

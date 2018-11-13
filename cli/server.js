@@ -1,12 +1,17 @@
-const app = require(`../app`);
-const config = require(`../config`);
+const {runServer} = require(`../app`);
+const {connectDb} = require(`../db/mongoose`);
 
 module.exports = {
   name: `--srv`,
   description: `starts server`,
   execute: () => {
-    app.listen(config.PORT, () => {
-      console.log(`Server is listening`);
-    });
+    connectDb()
+      .on(`error`, () => {
+        console.log(`Error in connection with db`);
+      })
+      .on(`connected`, () => {
+        console.log(`DB is connected`);
+        runServer();
+      });
   }
 };

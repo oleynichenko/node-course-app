@@ -67,8 +67,8 @@ const posts = [
 ];
 
 const user = {
-  _id: 12,
   username: `Alex Kurt`,
+  email: `test@gmail.com`,
   avatarUrl: `/img/avatar-fat.jpg`
 };
 

@@ -27,9 +27,8 @@
             })
             .catch(e => console.log(e));
     }
-
-    function getPostTemplate(post) {
-      const imgTemplate = `<div class="boy" data-grid="images">
+    function getImgTemplate(picture) {
+      return `<div class="boy" data-grid="images">
         <img class="js-post__img" 
           style="display: inline-block; 
             width: 346px; 
@@ -37,10 +36,11 @@
             margin-bottom: 10px; 
             margin-right: 0px; 
             vertical-align: bottom;" 
-          data-width="640" data-height="640" data-action="zoom" src="${post.picture}">
+          data-width="640" data-height="640" data-action="zoom" src="${picture}">
       </div>`;
-
-      const imgBlock = (post.picture) ? imgTemplate : ``;
+    }
+    function getPostTemplate(post) {
+      const imgBlock = (post.picture) ? getImgTemplate(post.picture) : ``;
 
       return `<li class="rv b agz">
           <img class="bos vb yb aff" src="${post.author.avatar}">
@@ -122,14 +122,22 @@
                     .then(response => response.json())
                     .then(response => {
                         postPublishEdit.removeEventListener('click', publishHandler);
-                        const textBlock = event.target.parentElement.parentElement.querySelector(`.js-post__text`);
-                        const img = event.target.parentElement.parentElement.querySelector(`.js-post__img`);
 
+                        const liBlock = event.target.parentElement.parentElement;
+                        const textBlock = liBlock.querySelector(`.js-post__text`);
                         textBlock.innerHTML = response.text;
-                        img.setAttribute('src', response.picture);
+
+                        const picture = response.picture;
+
+                        if (picture) {
+                          let img = liBlock.querySelector(`.js-post__img`);
+
+                          if (!img) {
+                            textBlock.insertAdjacentHTML(`afterEnd`, getImgTemplate(picture));
+                          }
+                          img.setAttribute('src', picture);
+                        }
                     });
-
-
                 };
 
                 postPublishEdit.addEventListener('click', publishHandler);
