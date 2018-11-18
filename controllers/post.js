@@ -34,7 +34,6 @@ const savePost = (req, res) => {
   };
 
   const fileData = req.file;
-
   if (fileData) {
     const pictureUrl = _getPictureUrl(fileData);
     const picturePath = _getPicturePath(pictureUrl);

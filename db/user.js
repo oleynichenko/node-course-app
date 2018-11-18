@@ -13,8 +13,8 @@ const UserSchema = new mongoose.Schema({
     // unique: true,
     required: [true, `Email is required`],
     validate: {
-      validator: function(v) {
-        var emailRegex = /^([\w-\.]+@([\w-]+\.)+[\w-]{2,4})?$/;
+      validator(v) {
+        const emailRegex = /^([\w-\.]+@([\w-]+\.)+[\w-]{2,4})?$/;
         return emailRegex.test(v);
       },
       message: `Email is not correct`

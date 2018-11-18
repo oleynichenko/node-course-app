@@ -9,9 +9,8 @@ router.post(`/`, upload.single(`picture`), controller.savePost);
 
 router.get(`/`, controller.sendPosts);
 
-router.get(`/:postId/`, controller.sendPost);
-
-router.patch(`/:postId/`, upload.single(`picture`), controller.editPost);
-router.delete(`/:postId/`, controller.deletePost);
+router.get(`/:postId`, controller.sendPost);
+router.patch(`/:postId`, upload.single(`picture`), controller.editPost);
+router.delete(`/:postId`, controller.deletePost);
 
 module.exports = router;

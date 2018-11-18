@@ -1,7 +1,6 @@
-const {DB_NAME} = require(`../config`);
 const {connectDb} = require(`../db/mongoose`);
 const mocks = require(`../mocks-data`);
-const PostModel = require(`../db/post`);
+// const PostModel = require(`../db/post`);
 const UserModel = require(`../db/user`);
 
 module.exports = {
@@ -24,7 +23,7 @@ module.exports = {
           } else {
             console.log(`User is added`);
             connection.close(function () {
-              console.log('Mongoose connection disconnected');
+              console.log(`Mongoose connection disconnected`);
             });
           }
         });

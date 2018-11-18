@@ -6,8 +6,7 @@ const PostSchema = new mongoose.Schema({
     required: true
   },
   publicationDate: {
-    type: Date,
-    required: true
+    type: Date
   },
   text: String,
   picture: String
