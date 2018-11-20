@@ -7,9 +7,9 @@ const upload = multer({storage: multer.memoryStorage()});
 
 router.post(`/`, upload.single(`picture`), controller.savePost);
 
-router.get(`/`, controller.sendPosts);
+router.get(`/`, controller.getPosts);
 
-router.get(`/:postId`, controller.sendPost);
+router.get(`/:postId`, controller.getPost);
 router.patch(`/:postId`, upload.single(`picture`), controller.editPost);
 router.delete(`/:postId`, controller.deletePost);
 

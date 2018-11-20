@@ -1,9 +1,10 @@
 const mongoose = require(`mongoose`);
 
-const UserSchema = new mongoose.Schema({
+const userSchema = new mongoose.Schema({
   username: {
     type: String,
-    required: true
+    required: true,
+    // unique: true,
   },
   password: String,
   firstName: String,
@@ -20,9 +21,13 @@ const UserSchema = new mongoose.Schema({
       message: `Email is not correct`
     }
   },
-  avatarUrl: String
+  avatar: String
 });
 
-const User = mongoose.model(`User`, UserSchema);
+userSchema.statics.getUserByEmail = function (email, cb) {
+  this.findOne({email}, cb);
+};
+
+const User = mongoose.model(`User`, userSchema);
 
 module.exports = User;

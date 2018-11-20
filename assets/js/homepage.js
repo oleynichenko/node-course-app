@@ -1,5 +1,7 @@
 (() => {
     const apiUrl = '/api/posts';
+    const commentsUrl = '/api/comments';
+    const commentUrl = '/api/comment';
 
     const feed = document.getElementById('feed');
     const createPost = document.getElementById('createPost');
@@ -13,6 +15,11 @@
     const postImageEdit = document.getElementById('postImageEdit');
     const postPublishEdit = document.getElementById('postPublishEdit');
 
+    const commentText = document.getElementById('commentText');
+    const commentPublish = document.getElementById('commentPublish');
+
+    const commentTextEdit = document.getElementById('commentTextEdit');
+    const commentPublishEdit = document.getElementById('commentPublishEdit');
     let actualPosts = [];
 
     init();
@@ -23,6 +30,7 @@
             .then(response => {
                 actualPosts = response;
                 renderPosts(actualPosts);
+                renderComments(actualPosts);
                 initListeners();
             })
             .catch(e => console.log(e));
@@ -48,18 +56,46 @@
           
             <div class="bpb">
               <small class="acx axc">${moment(post.publicationDate).format('YYYY-MM-DD HH:mm')}</small>
-              <h6>${post.author.name}</h6>
+              <h6>${post.author.firstName} ${post.author.lastName}</h6>
             </div>
-
+            
             <p class="js-post__text">${post.text}
             </p>
             ${imgBlock}
             <a href="#postModalEdit" class="boa" data-toggle="modal" data-id="${post.id}">
-                <button class="cg nz ok" data-id="${post.id}">Редактировать пост</button>
+                <button class="cg nz ok js-post-edit" data-id="${post.id}">Редактировать пост</button>
             </a>
-                <button type="button" class="close js-close" aria-hidden="true" title="Удалить">×</button>
+            <a href="#postModalComment" class="boa" data-toggle="modal" for="comment" data-id="${post.id}">
+               <button class="cg nz ok" data-id="${post.id}" for="comment" title="Оставить комментарий">Оставить комментарий</button>
+            </a>
+            <button type="button" class="close js-close" aria-hidden="true" title="Удалить">×</button>
+            <hr>
+            <ul class="bow afa commentBlock" id="comment-${post.id}">
+            </ul>
           </div>
         </li>`
+    }
+    function getCommentTemplate(comment) {
+      return `<li class="rv afh">
+                <div class="qa">
+                    <div class="rv">
+                        <img class="bos us aff yb" src="${comment.user.avatar}">
+                        <div class="rw">
+                            <div class="bpd">
+                                <div class="bpb">
+                                    <small class="acx axc">${moment(comment.publicationDate).fromNow()}</small>
+                                    <h6>${comment.user.firstName} ${comment.user.lastName}</h6>
+                                </div>
+                                <div class="bpb">${comment.text}</div>
+                                <a href="#postModalCommentEdit" class="boa" data-toggle="modal" for="edit-comment" data-id=${comment._id}>
+                                    <button type="button" class="cg axo axu oh" data-id=${comment._id} for="edit-comment" title="Оставить комментарий">Редактировать комментарий</button>
+                                </a>
+                                <button type="button" class="close js-comment-close" aria-hidden="true" data-id=${comment._id} title="Удалить">×</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+              </li>`
     }
 
     function renderPosts(posts) {
@@ -69,18 +105,60 @@
         })
     }
 
-    function addPost(post) {
-      feed.insertAdjacentHTML(`afterBegin`, getPostTemplate(post));
+    function renderPostComments(postId) {
+      const commentBlock = document.getElementById(`comment-${postId}`);
+      fetch(`${commentsUrl}/${postId}`)
+        .then(response => response.json())
+        .then(response => {
+          let template = ``;
+
+          response.forEach(comment => {
+            template += getCommentTemplate(comment);
+          });
+
+          commentBlock.innerHTML = template;
+        });
+    }
+
+    function renderComments(posts) {
+      posts.forEach(post => {
+        renderPostComments(post.id);
+      });
+    }
+
+    function addPost(id) {
+      fetch(`${apiUrl}/${id}`, {
+        method: 'GET'
+      })
+        .then(res => res.json())
+        .then(post => {
+          feed.insertAdjacentHTML(`afterBegin`, getPostTemplate(post));
+        })
+    }
+
+    function addComment(postId, id) {
+      fetch(`${commentUrl}/${id}`, {
+        method: `GET`
+      })
+        .then((res) => res.json())
+        .then((comment) => {
+          const commentBlock = document.getElementById(`comment-${postId}`);
+          commentBlock.insertAdjacentHTML(`beforeEnd`, getCommentTemplate(comment));
+        })
     }
 
     function initListeners() {
         createPost.addEventListener('click', createPostListener);
         feed.addEventListener('click', editPostListener);
         feed.addEventListener('click', deletePostListener);
+        feed.addEventListener('click', publishCommentListener);
+        feed.addEventListener('click', editCommentListener);
+        feed.addEventListener('click', deleteCommentListener);
     }
 
     function editPostListener(event) {
-        if (!event.target.getAttribute("data-id")) {
+
+        if (event.target.getAttribute("href") !== `#postModalEdit` && !event.target.classList.contains(`js-post-edit`)) {
             return;
         }
         postAttachEdit.value = '';
@@ -134,8 +212,9 @@
 
                           if (!img) {
                             textBlock.insertAdjacentHTML(`afterEnd`, getImgTemplate(picture));
+                          } else {
+                            img.setAttribute('src', picture);
                           }
-                          img.setAttribute('src', picture);
                         }
                     });
                 };
@@ -166,7 +245,8 @@
                 postPublishCreate.removeEventListener('click', createHandler);
                 postTextCreate.value = '';
                 postAttachCreate.value = '';
-                addPost(response);
+
+                addPost(response.id);
             });
         };
         postPublishCreate.addEventListener('click', createHandler);
@@ -200,4 +280,82 @@
         })
     }
 
+    function publishCommentListener(event) {
+      if (!event.target.getAttribute("data-id") || event.target.getAttribute('for') !== 'comment') {
+        return;
+      }
+
+      const postId = event.target.getAttribute("data-id");
+
+      const createHandler = () => {
+        let formData = new FormData();
+        formData.append('text', commentText.value);
+        formData.append('postId', postId);
+
+        const url = `${commentsUrl}/${postId}`;
+
+        fetch(url, {
+          method: 'POST',
+          body: formData
+        })
+          .then(response => response.json())
+          .then((response) => {
+            commentPublish.removeEventListener('click', createHandler);
+            commentText.value = '';
+            addComment(postId, response._id);
+          });
+
+      };
+
+      commentPublish.addEventListener('click', createHandler);
+
+    }
+
+    function editCommentListener(event) {
+      if (event.target.getAttribute('for') !== 'edit-comment') {
+        return;
+      }
+
+      const commentId = event.target.getAttribute("data-id");
+
+      fetch(`${commentUrl}/${commentId}`)
+        .then(res => res.json())
+        .then(comment => {
+          commentTextEdit.value = comment.text;
+
+          const editCommentHandler = () => {
+            let formData = new FormData();
+            formData.append('text', commentTextEdit.value);
+            formData.append('_id', comment._id);
+
+            fetch(`${commentUrl}/${commentId}`, {
+              method: 'PATCH',
+              body: formData
+            }).then(() => {
+              commentPublishEdit.removeEventListener('click', editCommentHandler);
+              const commentBlock = event.target.closest(`.commentBlock`);
+              const postId = +commentBlock.id.split(`-`)[1];
+              renderPostComments(postId);
+            });
+          };
+
+          commentPublishEdit.addEventListener('click', editCommentHandler);
+        });
+    }
+
+    function deleteCommentListener(event) {
+      if (!event.target.classList.contains("js-comment-close")) {
+        return;
+      }
+
+      const id = event.target.getAttribute("data-id");
+
+      fetch(`${commentUrl}/${id}`, {method: 'DELETE'})
+        .then(() => {
+          const commentBlock = event.target.closest(`.commentBlock`);
+          const postId = +commentBlock.id.split(`-`)[1];
+          renderPostComments(postId);
+        })
+    }
 })();
+

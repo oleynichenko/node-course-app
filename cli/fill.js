@@ -1,6 +1,7 @@
 const {connectDb} = require(`../db/mongoose`);
-const mocks = require(`../mocks-data`);
-// const PostModel = require(`../db/post`);
+const users = require(`../mocks/users`);
+const posts = require(`../mocks/posts`);
+const PostModel = require(`../db/post`);
 const UserModel = require(`../db/user`);
 
 module.exports = {
@@ -9,6 +10,21 @@ module.exports = {
   execute: () => {
     const connection = connectDb();
 
+    const saveUserPosts = (savedUser) => {
+      posts.forEach((post) => {
+        if (post.author === savedUser.firstName) {
+          post.author = savedUser._id;
+
+          PostModel.create(post, (err) => {
+            if (err) {
+              console.log(err);
+              process.exit(1);
+            }
+          });
+        }
+      });
+    };
+
     connection
       .on(`error`, () => {
         console.log(`Error in connection with db`);
@@ -16,22 +32,17 @@ module.exports = {
       .on(`connected`, () => {
         console.log(`DB is connected`);
 
-        UserModel.create(mocks.user, (err) => {
-          if (err) {
-            console.log(err);
-            process.exit(1);
-          } else {
-            console.log(`User is added`);
-            connection.close(function () {
-              console.log(`Mongoose connection disconnected`);
-            });
-          }
+        users.forEach((user) => {
+          UserModel.create(user, (err, savedUser) => {
+            if (err) {
+              console.log(err);
+              process.exit(1);
+            } else {
+              saveUserPosts(savedUser);
+            }
+          });
         });
-
-        // console.log(`Database ${DB_NAME} is filled with test data`);
-
+        // connection.close();
       });
-
-
   }
 };

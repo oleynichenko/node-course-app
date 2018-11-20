@@ -1,0 +1,18 @@
+[
+  {
+    "firstName": "Alex",
+    "lastName": "Kurt",
+    "username": "alex_kurt",
+    "email": "alex@gmail.com",
+    "avatar": "/img/avatar-fat.jpg",
+    "password": "123"
+  },
+  {
+    "firstName": "Jacob",
+    "lastName": "Thornton",
+    "username": "jcb",
+    "email": "jacob@gmail.com",
+    "avatar": "/img/avatar-mdo.png",
+    "password": "123"
+  }
+]

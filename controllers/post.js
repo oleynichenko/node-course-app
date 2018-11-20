@@ -1,9 +1,5 @@
 const fs = require(`fs`);
-const {user, posts} = require(`../mocks-data`);
-
-const _getMaxId = (data) => {
-  return data.reduce((max, obj) => obj.id > max ? obj.id : max, data[0].id);
-};
+const PostModel = require(`../db/post`);
 
 const _getFileExtension = (mimetype) => {
   return mimetype.split(`/`)[1];
@@ -22,16 +18,10 @@ const _getPicturePath = (url) => {
 };
 
 const savePost = (req, res) => {
-  const newPost = {
-    author: {
-      id: user._id,
-      name: user.username,
-      avatar: user.avatarUrl
-    },
-    publicationDate: Date.now(),
+  const post = new PostModel({
+    author: res.locals.user._id,
     text: req.body.text,
-    id: _getMaxId(posts) + 1
-  };
+  });
 
   const fileData = req.file;
   if (fileData) {
@@ -43,69 +33,102 @@ const savePost = (req, res) => {
       if (err) {
         console.log(err.message);
       } else {
-        newPost.picture = pictureUrl;
-        posts.push(newPost);
-
-        res.json(newPost);
+        post.set({picture: pictureUrl});
+        post.save((error, savedPost) => {
+          if (error) {
+            console.log(error);
+          } else {
+            res.json(savedPost);
+          }
+        });
       }
     });
   } else {
-    posts.push(newPost);
 
-    res.json(newPost);
+    post.save((error, savedPost) => {
+      if (error) {
+        console.log(error);
+      } else {
+        res.json(savedPost);
+      }
+    });
   }
 };
 
-const sendPost = (req, res) => {
+const getPost = (req, res) => {
   const postId = +req.params.postId;
-  const post = posts.find((item) => item.id === postId);
 
-  res.json(post);
+  PostModel.getPost(postId, (err, post) => {
+    if (err) {
+      console.log(err);
+    } else {
+      res.json(post);
+    }
+  });
 };
 
-const sendPosts = (req, res) => {
-  res.json(posts);
+const getPosts = (req, res) => {
+  PostModel.getPosts((err, data) => {
+    res.json(data);
+  });
 };
 
 const editPost = (req, res) => {
   const postId = +req.params.postId;
-  const post = posts.find((item) => item.id === postId);
-  post.text = req.body.text;
 
-  const fileData = req.file;
+  PostModel.findOne({id: postId}, (err, post) => {
+    if (err) {
+      console.log(err);
+    } else {
+      const text = req.body.text;
 
-  if (fileData) {
-    const pictureUrl = _getPictureUrl(fileData);
-    const picturePath = _getPicturePath(pictureUrl);
-    const pictureContent = fileData.buffer;
-
-    fs.writeFile(picturePath, pictureContent, {encoding: `binary`}, (err) => {
-      if (err) {
-        console.log(err.message);
-      } else {
-        post.picture = pictureUrl;
-
-        res.json(post);
+      if (text) {
+        post.text = text;
       }
-    });
-  } else {
-    res.json(post);
-  }
 
+      const fileData = req.file;
+
+      if (fileData) {
+        const pictureUrl = _getPictureUrl(fileData);
+        const picturePath = _getPicturePath(pictureUrl);
+        const pictureContent = fileData.buffer;
+
+        fs.writeFile(picturePath, pictureContent, {encoding: `binary`}, (error) => {
+          if (error) {
+            console.log(error.message);
+          }
+        });
+
+        post.picture = pictureUrl;
+      }
+
+      post.save((error, savedPost) => {
+        if (error) {
+          console.log(error);
+        } else {
+          res.json(savedPost);
+        }
+      });
+    }
+  });
 };
 
 const deletePost = (req, res) => {
   const postId = +req.params.postId;
-  const postIndex = posts.findIndex((elem) => elem.id === postId);
 
-  posts.splice(postIndex, 1);
-  res.send({postId});
+  PostModel.removePost(postId, (err) => {
+    if (err) {
+      console.log(err);
+    } else {
+      res.send({postId});
+    }
+  });
 };
 
 module.exports = {
   savePost,
-  sendPost,
-  sendPosts,
+  getPost,
+  getPosts,
   editPost,
   deletePost
 };
