@@ -274,7 +274,6 @@
       fetch(api, {
         method: `DELETE`
       })
-        .then((response) => response.json())
         .then(() => {
           event.target.parentElement.parentElement.remove();
         })

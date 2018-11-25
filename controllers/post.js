@@ -1,58 +1,22 @@
-const fs = require(`fs`);
 const PostModel = require(`../db/post`);
 
-const _getFileExtension = (mimetype) => {
-  return mimetype.split(`/`)[1];
-};
-
-const _getPictureUrl = (fileData) => {
-  const uniqueValue = Date.now();
-  const fileExt = _getFileExtension(fileData.mimetype);
-  const filename = `${uniqueValue}.${fileExt}`;
-
-  return `uploads/${filename}`;
-};
-
-const _getPicturePath = (url) => {
-  return `${process.cwd()}/assets/${url}`;
-};
-
-const savePost = (req, res) => {
+const savePost = (req, res, next) => {
   const post = new PostModel({
     author: res.locals.user._id,
     text: req.body.text,
   });
 
-  const fileData = req.file;
-  if (fileData) {
-    const pictureUrl = _getPictureUrl(fileData);
-    const picturePath = _getPicturePath(pictureUrl);
-    const pictureContent = fileData.buffer;
-
-    fs.writeFile(picturePath, pictureContent, {encoding: `binary`}, (err) => {
-      if (err) {
-        console.log(err.message);
-      } else {
-        post.set({picture: pictureUrl});
-        post.save((error, savedPost) => {
-          if (error) {
-            console.log(error);
-          } else {
-            res.json(savedPost);
-          }
-        });
-      }
-    });
-  } else {
-
-    post.save((error, savedPost) => {
-      if (error) {
-        console.log(error);
-      } else {
-        res.json(savedPost);
-      }
-    });
+  if (req.pictureUrl) {
+    post.set({picture: req.pictureUrl});
   }
+
+  post.save((error, savedPost) => {
+    if (error) {
+      next(error);
+    } else {
+      res.json(savedPost);
+    }
+  });
 };
 
 const getPost = (req, res) => {
@@ -73,12 +37,12 @@ const getPosts = (req, res) => {
   });
 };
 
-const editPost = (req, res) => {
+const editPost = (req, res, next) => {
   const postId = +req.params.postId;
 
   PostModel.findOne({id: postId}, (err, post) => {
     if (err) {
-      console.log(err);
+      next(err);
     } else {
       const text = req.body.text;
 
@@ -86,41 +50,29 @@ const editPost = (req, res) => {
         post.text = text;
       }
 
-      const fileData = req.file;
-
-      if (fileData) {
-        const pictureUrl = _getPictureUrl(fileData);
-        const picturePath = _getPicturePath(pictureUrl);
-        const pictureContent = fileData.buffer;
-
-        fs.writeFile(picturePath, pictureContent, {encoding: `binary`}, (error) => {
-          if (error) {
-            console.log(error.message);
-          }
-        });
-
-        post.picture = pictureUrl;
+      if (req.pictureUrl) {
+        post.picture = req.pictureUrl;
       }
 
       post.save((error, savedPost) => {
         if (error) {
-          console.log(error);
+          next(error);
         } else {
-          res.json(savedPost);
+          res.status(201).json(savedPost);
         }
       });
     }
   });
 };
 
-const deletePost = (req, res) => {
+const deletePost = (req, res, next) => {
   const postId = +req.params.postId;
 
   PostModel.removePost(postId, (err) => {
     if (err) {
-      console.log(err);
+      next(err);
     } else {
-      res.send({postId});
+      res.sendStatus(204);
     }
   });
 };

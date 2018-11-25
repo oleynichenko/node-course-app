@@ -2,6 +2,7 @@ const express = require(`express`);
 const initRouters = require(`./routes/index`);
 const config = require(`./config`);
 const UserModel = require(`./db/user`);
+const handleErrors = require(`./errors/handle-errors`);
 
 const currentUserEmail = `alex@gmail.com`;
 const app = express();
@@ -14,6 +15,7 @@ UserModel.getUserByEmail(currentUserEmail, (err, user) => {
     app.locals.user = user;
   }
 });
+
 app.use((req, res, next) => {
   res.locals.user = app.locals.user;
   next();
@@ -25,6 +27,7 @@ app.set(`view engine`, `pug`);
 app.use(express.static(`${__dirname}/assets`));
 initRouters(app);
 
+app.use(handleErrors);
 const runServer = () => {
   app.listen(config.PORT, () => {
     console.log(`Server is listening`);

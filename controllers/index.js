@@ -14,9 +14,19 @@ const getDocs = (req, res) => {
   res.render(`docs`, {pageName: `docs`});
 };
 
+const signin = (req, res) => {
+  res.render(`signin`);
+};
+
+const signup = (req, res) => {
+  res.render(`signup`);
+};
+
 module.exports = {
   getIndex,
   getProfile,
   getNotifications,
-  getDocs
+  getDocs,
+  signin,
+  signup
 };

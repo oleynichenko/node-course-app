@@ -1,5 +1,6 @@
 const mongoose = require(`mongoose`);
 const autoIncrement = require(`mongoose-auto-increment`);
+const fs = require(`fs`);
 
 autoIncrement.initialize(mongoose.connection);
 
@@ -31,7 +32,22 @@ postSchema.statics.getPosts = function (cb) {
 };
 
 postSchema.statics.removePost = function (id, cb) {
-  this.deleteOne({id}, cb);
+  this.findOne({id}, (err, post) => {
+    if (err) {
+      throw err;
+    }
+
+    if (post.picture) {
+      fs.unlink(`${process.cwd()}/assets/${post.picture}`, (error) => {
+        if (error) {
+          throw error;
+        }
+        post.delete(cb);
+      });
+    } else {
+      post.delete(cb);
+    }
+  });
 };
 
 postSchema.statics.getPost = function (id, cb) {

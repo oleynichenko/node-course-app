@@ -15,11 +15,11 @@ const getComment = (req, res) => {
 const deleteComment = (req, res) => {
   const id = req.params.commentId;
 
-  CommentModel.removeComment(id, (err, comment) => {
+  CommentModel.removeComment(id, (err) => {
     if (err) {
       console.log(err);
     } else {
-      res.json(comment);
+      res.sendStatus(204);
     }
   });
 };
@@ -38,7 +38,7 @@ const editComment = (req, res) => {
         if (error) {
           console.log(error);
         } else {
-          res.json(savedComment);
+          res.status(201).json(savedComment);
         }
       });
     }
