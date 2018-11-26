@@ -28,6 +28,7 @@ postSchema.statics.getPosts = function (cb) {
     .find()
     .populate(`author`, [`firstName`, `lastName`, `avatar`])
     .sort({publicationDate: -1})
+    .lean()
     .exec(cb);
 };
 

@@ -1,11 +1,15 @@
 const express = require(`express`);
 const initRouters = require(`./routes/index`);
-const config = require(`./config`);
+const config = require(`./config/index`);
 const UserModel = require(`./db/user`);
 const handleErrors = require(`./errors/handle-errors`);
-
 const currentUserEmail = `alex@gmail.com`;
+
+const passport = require(`passport`);
+require(`./config/passport`)(passport);
+
 const app = express();
+app.use(passport.initialize());
 
 // инициализируем временного пользователя
 UserModel.getUserByEmail(currentUserEmail, (err, user) => {
@@ -28,6 +32,7 @@ app.use(express.static(`${__dirname}/assets`));
 initRouters(app);
 
 app.use(handleErrors);
+
 const runServer = () => {
   app.listen(config.PORT, () => {
     console.log(`Server is listening`);

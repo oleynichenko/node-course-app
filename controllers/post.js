@@ -1,8 +1,10 @@
 const PostModel = require(`../db/post`);
 
 const savePost = (req, res, next) => {
+  const userId = req.user._id;
+
   const post = new PostModel({
-    author: res.locals.user._id,
+    author: userId,
     text: req.body.text,
   });
 
@@ -32,7 +34,15 @@ const getPost = (req, res) => {
 };
 
 const getPosts = (req, res) => {
+  const userId = req.user._id;
+
   PostModel.getPosts((err, data) => {
+    data.forEach((post) => {
+      if (post.author._id.equals(userId)) {
+        post.editable = true;
+      }
+    });
+
     res.json(data);
   });
 };
@@ -84,3 +94,4 @@ module.exports = {
   editPost,
   deletePost
 };
+

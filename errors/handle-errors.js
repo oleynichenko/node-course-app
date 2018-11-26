@@ -1,3 +1,6 @@
+const NotFoundError = require(`./not-found`);
+const BadRequest = require(`./bad-request`);
+
 module.exports = (err, req, res, next) => {
   let statusCode = 500;
 
@@ -21,6 +24,16 @@ module.exports = (err, req, res, next) => {
         });
       }
     }
+  }
+
+  if (err instanceof NotFoundError) {
+    statusCode = err.statusCode;
+    data.message = err.message;
+  }
+
+  if (err instanceof BadRequest) {
+    statusCode = err.statusCode;
+    data.message = err.message;
   }
 
   res.status(statusCode).send(data);

@@ -1,5 +1,5 @@
 const mongoose = require(`mongoose`);
-const {DB_HOST, DB_NAME} = require(`../config`);
+const {DB_HOST, DB_NAME} = require(`../config/index`);
 
 const connectDb = () => {
   const dbURI = `${DB_HOST}/${DB_NAME}`;

@@ -1,4 +1,4 @@
-(() => {
+document.addEventListener("DOMContentLoaded", function () {
     const apiUrl = '/api/posts';
     const commentsUrl = '/api/comments';
     const commentUrl = '/api/comment';
@@ -20,21 +20,44 @@
 
     const commentTextEdit = document.getElementById('commentTextEdit');
     const commentPublishEdit = document.getElementById('commentPublishEdit');
+    const logout = document.getElementById('logout-box');
     let actualPosts = [];
 
     init();
 
     function init() {
-        fetch(apiUrl)
-            .then(response => response.json())
-            .then(response => {
-                actualPosts = response;
-                renderPosts(actualPosts);
-                renderComments(actualPosts);
-                initListeners();
-            })
-            .catch(e => console.log(e));
+      if (localStorage.getItem('token')) {
+        body.classList.remove('hide');
+
+        const apiToken = localStorage.getItem('token');
+        const headers = new Headers();
+        headers.append('Authorization', apiToken);
+
+        fetch(apiUrl, {
+          method: 'GET',
+          headers: headers
+        })
+          .then(response => response.json())
+          .then(response => {
+              actualPosts = response;
+              renderPosts(actualPosts);
+              renderComments(actualPosts);
+              initListeners();
+          })
+          .catch(e => console.log(e));
+      } else {
+        window.location = '/signin'
+      }
     }
+
+    function getEditBtnTemplate(post) {
+      return `<a href="#postModalEdit" class="boa" data-toggle="modal" data-id="${post.id}"><button class="cg nz ok js-post-edit" data-id="${post.id}">Редактировать пост</button></a>`
+    }
+
+    function getDeleteBtnTemplate() {
+      return `<button type="button" class="close js-close" aria-hidden="true" title="Удалить">×</button>`
+    }
+
     function getImgTemplate(picture) {
       return `<div class="boy" data-grid="images">
         <img class="js-post__img" 
@@ -47,8 +70,11 @@
           data-width="640" data-height="640" data-action="zoom" src="${picture}">
       </div>`;
     }
+
     function getPostTemplate(post) {
       const imgBlock = (post.picture) ? getImgTemplate(post.picture) : ``;
+      const editBtn = (post.editable) ? getEditBtnTemplate(post) : ``;
+      const deleteBtn = (post.editable) ? getDeleteBtnTemplate() : ``;
 
       return `<li class="rv b agz">
           <img class="bos vb yb aff" src="${post.author.avatar}">
@@ -62,19 +88,18 @@
             <p class="js-post__text">${post.text}
             </p>
             ${imgBlock}
-            <a href="#postModalEdit" class="boa" data-toggle="modal" data-id="${post.id}">
-                <button class="cg nz ok js-post-edit" data-id="${post.id}">Редактировать пост</button>
-            </a>
+            ${editBtn}            
             <a href="#postModalComment" class="boa" data-toggle="modal" for="comment" data-id="${post.id}">
                <button class="cg nz ok" data-id="${post.id}" for="comment" title="Оставить комментарий">Оставить комментарий</button>
             </a>
-            <button type="button" class="close js-close" aria-hidden="true" title="Удалить">×</button>
+            ${deleteBtn}
             <hr>
             <ul class="bow afa commentBlock" id="comment-${post.id}">
             </ul>
           </div>
         </li>`
     }
+
     function getCommentTemplate(comment) {
       return `<li class="rv afh">
                 <div class="qa">
@@ -127,8 +152,13 @@
     }
 
     function addPost(id) {
+      const apiToken = localStorage.getItem('token');
+      const headers = new Headers();
+      headers.append('Authorization', apiToken);
+
       fetch(`${apiUrl}/${id}`, {
-        method: 'GET'
+        method: 'GET',
+        headers
       })
         .then(res => res.json())
         .then(post => {
@@ -154,6 +184,7 @@
         feed.addEventListener('click', publishCommentListener);
         feed.addEventListener('click', editCommentListener);
         feed.addEventListener('click', deleteCommentListener);
+        logout.addEventListener('click', logOutListener);
     }
 
     function editPostListener(event) {
@@ -236,9 +267,14 @@
                 formData.append('picture', postImageCreate.getAttribute('src'));
             }
 
+            const apiToken = localStorage.getItem('token');
+            const headers = new Headers();
+            headers.append('Authorization', apiToken);
+
             fetch(apiUrl, {
                 method: 'POST',
-                body: formData
+                body: formData,
+                headers
             })
               .then(response => response.json())
               .then((response) => {
@@ -356,5 +392,13 @@
           renderPostComments(postId);
         })
     }
-})();
 
+    function logOutListener(event) {
+      event.preventDefault();
+      console.log(23);
+      localStorage.clear();
+      setTimeout(() => {
+        window.location = '/signin';
+      }, 1000)
+    }
+});

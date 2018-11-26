@@ -10,6 +10,9 @@
   border-color: #d3e0e9;
 }
 
+.hide {
+  display: none;
+}
 
 /* general overrides */
 .b .c {
